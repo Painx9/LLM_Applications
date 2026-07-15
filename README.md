@@ -1,76 +1,71 @@
-# AI ATS Resume Analyzer
+Markdown
+🚀 Production-Ready LLM Applications
 
-An automated ATS (Applicant Tracking System) Resume Analyzer built to run seamlessly in Google Colab. This tool allows users to upload a PDF resume, automatically extracts the text, and leverages Google's Gemini generative AI model to score and provide structural feedback in a clean, structured JSON format.
+Welcome to my central repository for Large Language Model (LLM) applications. This repository serves as a showcase of production-grade AI tools, agents, and pipelines built using state-of-the-art LLMs (including Google Gemini, OpenAI GPT, and open-source models).
 
-## 🚀 Features
-
-* **Direct PDF Extraction:** Uses `PyPDF2` to read and parse local PDF files.
-* **AI-Powered Feedback:** Utilizes Google's state-of-the-art `gemini-3.1-flash-lite` model to analyze your professional profile.
-* **Structured JSON Output:** Guarantees standard formatted feedback containing:
-  * **ATS Score:** A rating from 0 to 100.
-  * **Summary:** A high-level assessment of the profile.
-  * **Strengths:** Key highlights and standout sections of the resume.
-  * **Weaknesses:** Tailored feedback on keyword gaps, formatting issues, and improvements.
-* **Google Colab Friendly:** Ready to run in any browser with quick file-uploader widgets and secure secret API management.
+Each project in this is fully functional, utilizing modern frontend interfaces (like Streamlit), robust error handling, and structured data extraction.
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+🛠️ Core Tech Stack & Skills Highlighted
 
-* **Language:** Python 3
-* **PDF Parser:** `PyPDF2`
-* **AI Model API:** `google-genai` (SDK)
-* **Platform:** Google Colab
+* **LLM SDKs:** Google GenAI SDK, OpenAI API, LangChain
+* **Frameworks & Frontends:** Streamlit, FastAPI
+* **Data & Parsers:** PyPDF2, Pydantic (Structured Outputs), JSON schemas
+* **Advanced AI Concepts:** Retrieval-Augmented Generation (RAG), Semantic Search, Function Calling, System Instructions, Robust Exception Fallbacks (503 handling)
 
 ---
 
-## ⚙️ How to Setup & Run
+📁 Project Directory
 
-### 1. Prerequisite (Google Gemini API Key)
-To run this analyzer, you need a free API Key from Google AI Studio. 
-* Generate your key at [Google AI Studio](https://aistudio.google.com/).
+| Project Name | Description | Key Tech Used | Quick Link |
+| :--- | :--- | :--- | :--- |
+| **📄 AI ATS Resume Analyzer** | Uploads PDF resumes directly, parses formatting, and uses Gemini to output structured JSON ATS feedback and scores. | `google-genai`, `Streamlit`, `Pydantic` | [View Folder](./AI_Resume_Analyzer/) |
+| **🎥 AI YouTube Video Analyzer** | Extracts video transcripts, metadata, and performs deep-dive sentiment/topic analysis with semantic summarization. | `google-genai`, `Streamlit`, `YouTube Transcript API` | [View Folder](./AI_YouTube_Analyzer/) |
 
-### 2. Setup Google Colab Secrets
-To protect your credentials:
-1. Open your copy of the notebook in Google Colab.
-2. Click on the **Key icon (Secrets)** in the left sidebar.
-3. Add a new secret:
-   * **Name:** `GOOGLE_API_KEY`
-   * **Value:** *Paste your Gemini API key here*
-4. Toggle on **Notebook access** for this secret.
 
-### 3. Execution Steps
-Once inside the notebook, run the cells sequentially:
+💡 **How to navigate:** Each project has its own sub-folder containing its dedicated codebase, local installation steps, and individual setup guides.
 
-* **Install Dependencies:** Installs the required document reading and Gemini client libraries.
-```bash
-pip install google-genai PyPDF2
-Upload Resume: An interactive upload box will prompt you to select your PDF resume file from your local computer.
+---
 
-Analyze: The script parses the text and sends a structured prompt to the Gemini API.
+## ⚙️ Global Setup Guide
 
-Get Feedback: The terminal will print a structured JSON feedback payload.
+While individual projects may have specific requirements, you can set up the global environment for this entire suite of tools by following these steps:
 
-📊 Expected Output Format
-The analyzer returns a clean, structured JSON payload similar to the following:
+### 1. Clone this Repository
+```
+bash
+git clone [https://github.com/YOUR_GITHUB_USERNAME/LLM_Applications.git](https://github.com/YOUR_GITHUB_USERNAME/LLM_Applications.git)
+cd LLM_Applications
+```
+2. Configure Environment Variables
+Most applications in this repository require API keys. Create a .env file in the root directory:
+```
+Code snippet
+# Google Gemini API Configuration
+GEMINI_API_KEY=your_gemini_api_key_here
 
-JSON
-{
-  "ats_score": 85,
-  "summary": "The candidate shows robust experience in full-stack Python development and cloud infrastructure, though some metric-driven accomplishments are missing.",
-  "strengths": [
-    "Clear project headings and standard font layouts",
-    "Strong keyword density for 'Python', 'Docker', and 'AWS'",
-    "Education and certifications are highly visible"
-  ],
-  "weaknesses": [
-    "Work experience points are passive; use more action verbs",
-    "Lacks quantitative metrics (e.g., 'improved performance by X%')",
-    "Missing a dedicated portfolio/GitHub link in the header"
-  ]
-}
+# OpenAI API Configuration (If used)
+OPENAI_API_KEY=your_openai_api_key_here
+```
+3. Install Common Dependencies
+```
+Bash
+pip install -r requirements.txt
+```
+📈 System Design Philosophy
+Across all these projects, I focus heavily on writing production-ready code. This means:
+
+1. Bulletproof Error Handling: Implementing automatic model fallbacks (e.g., falling back to stable older models like Gemini 1.5 if a preview model throws a 503 Service Unavailable error).
+
+2. Strict Type Safety: Forcing models to output structured, parseable JSON via Pydantic schemas instead of raw string parsing.
+
+3. Optimized Token Budgets: Designing compact, context-focused system prompts to keep latency and costs low.
 
 📜 License
-This project is licensed under the MIT License - feel free to customize and use it for your own applications!
+This project is licensed under the MIT License. Feel free to use, modify, and build upon any of these code bases for your own applications!
 
-   
+
+
+
+  
