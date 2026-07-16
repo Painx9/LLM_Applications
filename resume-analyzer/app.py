@@ -3,34 +3,15 @@ from google import genai
 import PyPDF2
 import json
 
-# --- PAGE CONFIGURATION ---
-st.set_page_config(
-    page_title="AI Resume Analyzer Pro",
-    page_icon="📊",
-    layout="wide",  # Utilizing the full screen width
-    initial_sidebar_state="expanded"
-)
-
 # --- SIDEBAR (INPUT CONTROLS) ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/3135/3135673.png", width=80)
     st.title("Settings & Upload")
     st.markdown("Configure your scanner settings below.")
     
-    # 1. API Key Setup
-    api_key = None
-    try:
-        if "GOOGLE_API_KEY" in st.secrets:
-            api_key = st.secrets["GOOGLE_API_KEY"]
-    except Exception:
-        pass
-
-    if not api_key:
-        api_key = st.text_input("Gemini API Key", type="password", help="Input your Google Gemini API Key here.")
-    
     st.divider()
     
-    # 2. File Upload in Sidebar
+    # File Upload in Sidebar
     uploaded_file = st.file_uploader("Upload Resume (PDF)", type=["pdf"])
     
     st.divider()
@@ -86,8 +67,11 @@ def analyze_resume(text, api_key):
         return None
 
 # --- MAIN APP ROUTING ---
+# Fetch the global API key configured on the main page
+api_key = st.session_state.get("GOOGLE_API_KEY")
+
 if not api_key:
-    st.warning("⚠️ Please provide a Gemini API Key in the sidebar to unlock the dashboard.")
+    st.warning("⚠️ Please provide a Gemini API Key in the sidebar configuration to unlock the dashboard.")
     st.stop()
 
 if uploaded_file is None:
