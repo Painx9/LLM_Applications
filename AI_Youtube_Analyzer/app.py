@@ -36,7 +36,8 @@ def extract_video_id(url: str) -> str:
 def get_video_transcript(video_id: str) -> str:
     """Retrieves and compiles the transcript of a YouTube video."""
     try:
-        transcript = YouTubeTranscriptApi.fetch(video_id)
+        # Corrected method call
+        transcript = YouTubeTranscriptApi.get_transcript(video_id)
         text = " ".join([item['text'] for item in transcript])
         return text
     except Exception as e:
