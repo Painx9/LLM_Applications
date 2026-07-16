@@ -2,6 +2,8 @@ import streamlit as st
 import PyPDF2
 import json
 from google import genai
+from pydantic import BaseModel, Field
+from typing import List
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -9,6 +11,14 @@ st.set_page_config(
     page_icon="📄",
     layout="centered"
 )
+
+# --- GOOGLE GENAI SCHEMA DEFINITIONS ---
+# This forces the model to structure the output and automatically escapes special characters
+class DetailedATSAnalysis(BaseModel):
+    ats_score: int = Field(..., description="An overall ATS compliance score from 0 to 100.")
+    summary: str = Field(..., description="A deep analysis of the candidate's professional level and domain fit.")
+    strengths: List[str] = Field(..., description="List of 3-5 major highlights or solid sections of the resume.")
+    weaknesses: List[str] = Field(..., description="Crucial elements this resume is lacking or needs to optimize.")
 
 # --- SIDEBAR CONFIGURATION ---
 st.sidebar.title("🔑 API Configuration")
@@ -40,33 +50,27 @@ def read_resume(uploaded_file):
     return text
 
 # --- Gemini ATS Analysis Pipeline ---
-def analyze_resume(text, api_key):
+def analyze_resume(text, api_key) -> DetailedATSAnalysis:
     client = genai.Client(api_key=api_key)
     prompt = f"""
-You are an ATS resume analyzer.
+You are an expert ATS resume analyzer. 
 
-Analyze the resume below and return ATS score and feedback.
+Analyze the resume below and structure your feedback matching the requested schema.
 
-Resume:
+Resume Content:
 {text}
-
-Return in JSON format with:
-- ats_score (0-100)
-- summary
-- strengths (list of strings)
-- weaknesses (list of strings)
-
-Rules:
-- Output ONLY JSON
-- No extra text, no markdown block wrappers (just raw JSON)
 """
-    # Using 'gemini-2.5-flash' which is the standard, stable model in the Google GenAI SDK
+    # Passing our Pydantic class to response_schema guarantees syntactically perfect JSON!
     response = client.models.generate_content(
         model="gemini-3.5-flash", 
         contents=prompt,
-        config={"response_mime_type": "application/json"}
+        config={
+            "response_mime_type": "application/json",
+            "response_schema": DetailedATSAnalysis,
+        }
     )
-    return response.text
+    # The SDK automatically handles validation and parsing
+    return response.parsed
 
 # --- Dashboard Layout ---
 st.title("📄 AI ATS Resume Analyzer")
@@ -87,16 +91,15 @@ if uploaded_file is not None:
                 if not raw_text.strip():
                     st.error("Could not extract text. Please confirm this PDF is not a flat image.")
                 else:
-                    result_json_str = None # Initialize empty to prevent NameError if API fails
                     try:
-                        result_json_str = analyze_resume(raw_text, st.session_state["GOOGLE_API_KEY"])
-                        result_data = json.loads(result_json_str)
+                        # Calls Gemini and directly returns a structured python object
+                        analysis_result = analyze_resume(raw_text, st.session_state["GOOGLE_API_KEY"])
                         
                         st.markdown("---")
                         st.header("📊 ATS Performance Analysis")
                         
                         # ATS Metric Score Display
-                        score = int(result_data.get("ats_score", 0))
+                        score = analysis_result.ats_score
                         if score >= 80:
                             st.metric("ATS Score", f"{score}/100", delta="Excellent Match")
                         elif score >= 50:
@@ -105,22 +108,18 @@ if uploaded_file is not None:
                             st.metric("ATS Score", f"{score}/100", delta="Weak Match", delta_color="inverse")
                         
                         st.subheader("💡 Analysis Summary")
-                        st.info(result_data.get("summary", "No summary generated."))
+                        st.info(analysis_result.summary)
                         
                         # Columns layout for Strengths & Weaknesses
                         col1, col2 = st.columns(2)
                         with col1:
                             st.subheader("✅ Identified Strengths")
-                            strengths = result_data.get("strengths", [])
-                            for item in strengths:
+                            for item in analysis_result.strengths:
                                 st.write(f"✔️ {item}")
                         with col2:
                             st.subheader("❌ Areas to Improve")
-                            weaknesses = result_data.get("weaknesses", [])
-                            for item in weaknesses:
+                            for item in analysis_result.weaknesses:
                                 st.write(f"🔍 {item}")
                                 
                     except Exception as e:
                         st.error(f"Failed to parse or run the analysis. Error: {e}")
-                        if result_json_str:
-                            st.code(result_json_str)
