@@ -17,21 +17,8 @@ else:
     st.session_state["GOOGLE_API_KEY"] = None
     st.sidebar.warning("⚠️ Please enter your API key to run the tools.")
 
-# --- Define Your Pages (Updated to match your exact GitHub folders!) ---
-pages = {
-    "Welcome": [
-        st.Page("main.py", title="Dashboard Home", icon="🏠")
-    ],
-    "My LLM Tools": [
-        st.Page("ai-video-analyzer/app.py", title="YouTube Video Summarizer", icon="🎥"),
-        st.Page("resume-analyzer/app.py", title="AI Resume Analyzer", icon="📄"),
-    ]
-}
-
-pg = st.navigation(pages)
-pg.run()
-
-if pg.title == "Dashboard Home":
+# --- Define Home Page Content Function ---
+def show_home():
     st.title("Welcome to My LLM App Portfolio! 🚀")
     st.write("A unified hub hosting my generative AI utility applications.")
     st.markdown("""
@@ -41,3 +28,19 @@ if pg.title == "Dashboard Home":
     2. Paste it in the **Configuration** box on the left sidebar.
     3. Choose any application from the navigation sidebar and start analyzing!
     """)
+
+# --- Define Your Pages ---
+# Notice we pass the Python function `show_home` instead of the string "main.py"
+pages = {
+    "Welcome": [
+        st.Page(show_home, title="Dashboard Home", icon="🏠")
+    ],
+    "My LLM Tools": [
+        st.Page("ai-video-analyzer/app.py", title="YouTube Video Summarizer", icon="🎥"),
+        st.Page("resume-analyzer/app.py", title="AI Resume Analyzer", icon="📄"),
+    ]
+}
+
+# --- Initialize & Run Navigation ---
+pg = st.navigation(pages)
+pg.run()
