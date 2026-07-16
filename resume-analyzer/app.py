@@ -62,7 +62,7 @@ Rules:
 """
     # Using 'gemini-2.5-flash' which is the standard, stable model in the Google GenAI SDK
     response = client.models.generate_content(
-        model="gemini-2.5-flash", 
+        model="gemini-3.5-flash", 
         contents=prompt,
         config={"response_mime_type": "application/json"}
     )
