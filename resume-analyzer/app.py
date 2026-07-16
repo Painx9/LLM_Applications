@@ -60,6 +60,7 @@ Rules:
 - Output ONLY JSON
 - No extra text, no markdown block wrappers (just raw JSON)
 """
+    # Using 'gemini-2.5-flash' which is the standard, stable model in the Google GenAI SDK
     response = client.models.generate_content(
         model="gemini-2.5-flash", 
         contents=prompt,
@@ -86,6 +87,7 @@ if uploaded_file is not None:
                 if not raw_text.strip():
                     st.error("Could not extract text. Please confirm this PDF is not a flat image.")
                 else:
+                    result_json_str = None # Initialize empty to prevent NameError if API fails
                     try:
                         result_json_str = analyze_resume(raw_text, st.session_state["GOOGLE_API_KEY"])
                         result_data = json.loads(result_json_str)
@@ -119,5 +121,6 @@ if uploaded_file is not None:
                                 st.write(f"🔍 {item}")
                                 
                     except Exception as e:
-                        st.error("Failed to parse analysis.")
-                        st.code(result_json_str)
+                        st.error(f"Failed to parse or run the analysis. Error: {e}")
+                        if result_json_str:
+                            st.code(result_json_str)
