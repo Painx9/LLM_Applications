@@ -13,7 +13,6 @@ st.set_page_config(
 )
 
 # --- GOOGLE GENAI SCHEMA DEFINITIONS ---
-# This forces the model to structure the output and automatically escapes special characters
 class DetailedATSAnalysis(BaseModel):
     ats_score: int = Field(..., description="An overall ATS compliance score from 0 to 100.")
     summary: str = Field(..., description="A deep analysis of the candidate's professional level and domain fit.")
@@ -29,7 +28,6 @@ user_api_key = st.sidebar.text_input(
     help="Grab a free API key from Google AI Studio to run this tool."
 )
 
-# Securely save the key in session state
 if user_api_key:
     st.session_state["GOOGLE_API_KEY"] = user_api_key
 else:
@@ -60,16 +58,15 @@ Analyze the resume below and structure your feedback matching the requested sche
 Resume Content:
 {text}
 """
-    # Passing our Pydantic class to response_schema guarantees syntactically perfect JSON!
+    # Changed model identifier to gemini-3.1-flash-lite
     response = client.models.generate_content(
-        model="gemini-3.5-flash", 
+        model="gemini-3.1-flash-lite", 
         contents=prompt,
         config={
             "response_mime_type": "application/json",
             "response_schema": DetailedATSAnalysis,
         }
     )
-    # The SDK automatically handles validation and parsing
     return response.parsed
 
 # --- Dashboard Layout ---
@@ -92,7 +89,6 @@ if uploaded_file is not None:
                     st.error("Could not extract text. Please confirm this PDF is not a flat image.")
                 else:
                     try:
-                        # Calls Gemini and directly returns a structured python object
                         analysis_result = analyze_resume(raw_text, st.session_state["GOOGLE_API_KEY"])
                         
                         st.markdown("---")
