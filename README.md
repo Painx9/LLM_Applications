@@ -20,7 +20,7 @@ Each project in this is fully functional, utilizing modern frontend interfaces (
 
 | Project Name | Description | Key Tech Used | Quick Link |
 | :--- | :--- | :--- | :--- |
-| **📄 AI ATS Resume Analyzer** | Uploads PDF resumes directly, parses formatting, and uses Gemini to output structured JSON ATS feedback and scores. | `google-genai`, `Streamlit`, `Pydantic` | [View Folder](./AI_Resume_Analyzer/) |
+| **📄 AI ATS Resume Analyzer** | Uploads PDF resumes directly, parses formatting, and uses Gemini to output structured JSON ATS feedback and scores. | `google-genai`, `Streamlit`, `Pydantic` | [View Folder](resume-analyzer) |
 | **🎥 AI YouTube Video Analyzer** | Extracts video transcripts, metadata, and performs deep-dive sentiment/topic analysis with semantic summarization. | `google-genai`, `Streamlit`, `YouTube Transcript API` | [View Folder](./AI_YouTube_Analyzer/) |
 
 
