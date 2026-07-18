@@ -37,11 +37,24 @@ def analyze_video(url):
     
     # Pass the URL directly as a part of the contents list
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",  # Configured to use your requested model variant
+        model="gemini-3.1-flash-lite",  # Updated to the correct active lite model identifier
         contents=[url, prompt]
     )
     return response.text
 
+# Chat Model Function
+def ask_question(url, question):
+    prompt = f"""
+    Answer the following question based strictly on this video:
+    
+    Question: {question}
+    """
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite",  # Updated to the correct active lite model identifier
+        contents=[url, prompt]
+    )
+    return response.text
+    
 # Chat Model Function
 def ask_question(url, question):
     prompt = f"""
