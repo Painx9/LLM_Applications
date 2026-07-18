@@ -37,7 +37,7 @@ def analyze_video(url):
     
     # Pass the URL directly as a part of the contents list
     response = client.models.generate_content(
-        model="gemini-2.5-flash",  # Upgraded to 2.5 flash which handles web/video inputs beautifully
+        model="gemini-3.5-flash-lite",  # Configured to use your requested model variant
         contents=[url, prompt]
     )
     return response.text
@@ -50,7 +50,7 @@ def ask_question(url, question):
     Question: {question}
     """
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash-lite",  # Configured to use your requested model variant
         contents=[url, prompt]
     )
     return response.text
