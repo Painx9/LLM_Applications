@@ -1,6 +1,4 @@
 import streamlit as st
-import re
-from youtube_transcript_api import YouTubeTranscriptApi
 from google import genai
 
 # Page configuration
@@ -12,11 +10,11 @@ st.set_page_config(
 
 # App Header
 st.title("🎥 AI YouTube Video Analyzer")
-st.markdown("Extract insights, summaries, and ask questions directly from any YouTube video transcript.")
+st.markdown("Extract insights, summaries, and ask questions directly from any YouTube video using Gemini.")
 
 # Sidebar Configuration for API Key
 st.sidebar.header("Settings")
-api_key = st.sidebar.text_input("Enter Google API Key:", type="password", help="Your gemini API key.")
+api_key = st.sidebar.text_input("Enter Google API Key:", type="password", help="Your Gemini API key.")
 
 # Initialize Gemini Client if API key is provided
 client = None
@@ -25,69 +23,41 @@ if api_key:
 else:
     st.sidebar.warning("Please enter your Google API Key to proceed.")
 
-# Helper function to extract Video ID from various YouTube URL formats
-def extract_video_id(url):
-    pattern = r'(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})'
-    match = re.search(pattern, url)
-    return match.group(1) if match else None
-
-# Extract Transcript Function
-# Extract Transcript Function
-def get_transcript(video_id):
-    try:
-        # Instantiate the API client object directly to avoid class attribute errors
-        srt = YouTubeTranscriptApi()
-        
-        # Use the shortcut fetch method on the instance to get data
-        transcript = srt.fetch(video_id)
-        
-        # Reconstruct the transcript into a single continuous text string
-        text = " ".join([item['text'] if isinstance(item, dict) else item.text for item in transcript])
-        return text
-    except Exception as e:
-        st.error(f"Error fetching transcript: {e}")
-        return None
-
-# Analysis Function
-def analyze_video(transcript_text):
+# Analysis Function using Gemini's Native Video Support
+def analyze_video(url):
     prompt = f"""
-    Analyze this YouTube video transcript and provide:
+    Analyze this YouTube video and provide:
 
     1. Summary (short)
     2. Detailed explanation
     3. Key points (bullet list)
     4. Important insights
     5. 5 Questions & Answers
-
-    Transcript:
-    {transcript_text}
     """
+    
+    # Pass the URL directly as a part of the contents list
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
-        contents=prompt
+        model="gemini-2.5-flash",  # Upgraded to 2.5 flash which handles web/video inputs beautifully
+        contents=[url, prompt]
     )
     return response.text
 
 # Chat Model Function
-def ask_question(transcript_text, question):
+def ask_question(url, question):
     prompt = f"""
-    Answer the question based on this video transcript:
-
-    Transcript:
-    {transcript_text}
-
-    Question:
-    {question}
+    Answer the following question based strictly on this video:
+    
+    Question: {question}
     """
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
-        contents=prompt
+        model="gemini-2.5-flash",
+        contents=[url, prompt]
     )
     return response.text
 
-# Initialize session state for holding transcript & initial analysis
-if "transcript" not in st.session_state:
-    st.session_state.transcript = None
+# Initialize session state for holding video URL & initial analysis
+if "current_url" not in st.session_state:
+    st.session_state.current_url = None
 if "analysis" not in st.session_state:
     st.session_state.analysis = None
 
@@ -100,16 +70,13 @@ if st.button("Analyze Video", type="primary"):
     elif not video_url:
         st.warning("Please provide a valid YouTube link.")
     else:
-        video_id = extract_video_id(video_url)
-        if not video_id:
-            st.error("Could not parse Video ID from the provided URL.")
-        else:
-            with st.spinner("Fetching transcript and generating analysis..."):
-                transcript = get_transcript(video_id)
-                if transcript:
-                    st.session_state.transcript = transcript
-                    st.session_state.analysis = analyze_video(transcript)
-                    st.success("Analysis Complete!")
+        with st.spinner("Gemini is analyzing the video directly..."):
+            try:
+                st.session_state.current_url = video_url
+                st.session_state.analysis = analyze_video(video_url)
+                st.success("Analysis Complete!")
+            except Exception as e:
+                st.error(f"Error analyzing video: {e}")
 
 # Display Results UI if Data Exists
 if st.session_state.analysis:
@@ -126,8 +93,11 @@ if st.session_state.analysis:
         if st.button("Ask AI"):
             if user_query:
                 with st.spinner("Finding answer..."):
-                    answer = ask_question(st.session_state.transcript, user_query)
-                    st.markdown("### 🤖 Answer:")
-                    st.info(answer)
+                    try:
+                        answer = ask_question(st.session_state.current_url, user_query)
+                        st.markdown("### 🤖 Answer:")
+                        st.info(answer)
+                    except Exception as e:
+                        st.error(f"Error generating answer: {e}")
             else:
                 st.warning("Please enter a question first.")
