@@ -34,9 +34,14 @@ def extract_video_id(url):
 # Extract Transcript Function
 def get_transcript(video_id):
     try:
-        # The correct, standard static class method
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        # Process the list of dictionaries returned by the API
+        # Retrieve the transcript list object for the video
+        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        
+        # Find the best available transcript (manually created or auto-generated)
+        # and fetch its raw text contents
+        transcript = transcript_list.find_transcript(['en']).fetch()
+        
+        # Format the pieces into a single comprehensive string block
         text = " ".join([item['text'] for item in transcript])
         return text
     except Exception as e:
