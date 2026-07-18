@@ -34,8 +34,9 @@ def extract_video_id(url):
 # Extract Transcript Function
 def get_transcript(video_id):
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
-        text = " ".join([item['text'] for item in transcript])
+        # Call the static fetch method directly on the class
+        transcript = YouTubeTranscriptApi.fetch(video_id)
+        text = " ".join([item['text'] if isinstance(item, dict) else item.text for item in transcript])
         return text
     except Exception as e:
         st.error(f"Error fetching transcript: {e}")
