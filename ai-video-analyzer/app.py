@@ -1,5 +1,6 @@
 import streamlit as st
 from google import genai
+from google.genai import types
 
 # Page configuration
 st.set_page_config(
@@ -23,9 +24,9 @@ if api_key:
 else:
     st.sidebar.warning("Please enter your Google API Key to proceed.")
 
-# Analysis Function using Gemini's Native Video Support
+# Analysis Function using Gemini's Native Video Object Support
 def analyze_video(url):
-    prompt = f"""
+    prompt = """
     Analyze this YouTube video and provide:
 
     1. Summary (short)
@@ -35,36 +36,30 @@ def analyze_video(url):
     5. 5 Questions & Answers
     """
     
-    # Pass the URL directly as a part of the contents list
+    # Formulate explicit URI part so the API treats it as video input
+    video_part = types.Part.from_uri(
+        file_uri=url,
+        mime_type="video/mp4"
+    )
+    
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",  # Updated to the correct active lite model identifier
-        contents=[url, prompt]
+        model="gemini-3.1-flash-lite",
+        contents=[video_part, prompt]
     )
     return response.text
 
 # Chat Model Function
 def ask_question(url, question):
-    prompt = f"""
-    Answer the following question based strictly on this video:
+    prompt = f"Answer the following question based strictly on this video:\n\nQuestion: {question}"
     
-    Question: {question}
-    """
-    response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",  # Updated to the correct active lite model identifier
-        contents=[url, prompt]
+    video_part = types.Part.from_uri(
+        file_uri=url,
+        mime_type="video/mp4"
     )
-    return response.text
     
-# Chat Model Function
-def ask_question(url, question):
-    prompt = f"""
-    Answer the following question based strictly on this video:
-    
-    Question: {question}
-    """
     response = client.models.generate_content(
-        model="gemini-3.5-flash-lite",  # Configured to use your requested model variant
-        contents=[url, prompt]
+        model="gemini-3.1-flash-lite",
+        contents=[video_part, prompt]
     )
     return response.text
 
@@ -83,7 +78,7 @@ if st.button("Analyze Video", type="primary"):
     elif not video_url:
         st.warning("Please provide a valid YouTube link.")
     else:
-        with st.spinner("Gemini is analyzing the video directly..."):
+        with st.spinner("Gemini is processing the real video content..."):
             try:
                 st.session_state.current_url = video_url
                 st.session_state.analysis = analyze_video(video_url)
