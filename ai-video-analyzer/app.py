@@ -32,17 +32,17 @@ def extract_video_id(url):
     return match.group(1) if match else None
 
 # Extract Transcript Function
+# Extract Transcript Function
 def get_transcript(video_id):
     try:
-        # Retrieve the transcript list object for the video
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+        # Instantiate the API client object directly to avoid class attribute errors
+        srt = YouTubeTranscriptApi()
         
-        # Find the best available transcript (manually created or auto-generated)
-        # and fetch its raw text contents
-        transcript = transcript_list.find_transcript(['en']).fetch()
+        # Use the shortcut fetch method on the instance to get data
+        transcript = srt.fetch(video_id)
         
-        # Format the pieces into a single comprehensive string block
-        text = " ".join([item['text'] for item in transcript])
+        # Reconstruct the transcript into a single continuous text string
+        text = " ".join([item['text'] if isinstance(item, dict) else item.text for item in transcript])
         return text
     except Exception as e:
         st.error(f"Error fetching transcript: {e}")
