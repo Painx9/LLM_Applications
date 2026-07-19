@@ -1,17 +1,25 @@
 import requests
 
-def get_weather(city_name):
-    # 1. Get coordinates for the city
-    geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city_name}"
-    geo_res = requests.get(geo_url).json()
+def get_weather(city_name, owm_api_key):
+    """
+    Fetches real-time weather data using the OpenWeatherMap API.
+    """
+    # Using metric units for Celsius
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={owm_api_key}&units=metric"
+    response = requests.get(url)
     
-    if "results" not in geo_res:
+    if response.status_code != 200:
         return None
+        
+    data = response.json()
     
-    data = geo_res["results"][0]
-    lat, lon = data["latitude"], data["longitude"]
+    # Extracting standard fields from the JSON response
+    weather_data = {
+        "temperature": data["main"]["temp"],
+        "humidity": data["main"]["humidity"],
+        "description": data["weather"][0]["description"],
+        "city": data["name"],
+        "country": data["sys"]["country"]
+    }
     
-    # 2. Get weather forecast
-    weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code"
-    response = requests.get(weather_url).json()
-    return response["current"]
+    return weather_data
